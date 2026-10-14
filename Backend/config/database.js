@@ -128,6 +128,13 @@ async function initializeDatabase() {
       );
     `);
 
+    await pool.query('ALTER TABLE bookings DROP CONSTRAINT IF EXISTS bookings_resourceid_fkey');
+    await pool.query(`
+      ALTER TABLE bookings
+        ADD CONSTRAINT bookings_resourceid_fkey
+        FOREIGN KEY ("resourceId") REFERENCES resources(id) ON DELETE CASCADE
+    `);
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id VARCHAR(20) PRIMARY KEY,

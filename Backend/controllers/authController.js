@@ -66,12 +66,13 @@ async function register(req, res) {
 
 async function login(req, res) {
   if (!databaseState.ready) return res.status(503).json({ message: 'Database is unavailable.' });
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
   if (!email || !password) return res.status(400).json({ message: 'email and password are required.' });
 
   const { rows } = await pool.query('SELECT * FROM users WHERE email = $1 AND status = $2', [email.trim().toLowerCase(), 'active']);
   const user = rows[0];
   if (!user || !verifyPassword(password, user.passwordHash)) return res.status(401).json({ message: 'Invalid email or password.' });
+  if (role && user.role !== role) return res.status(403).json({ message: `This account is not an ${role} account.` });
 
   const token = await createSession(user.id);
   return res.json({ user: toUser(user), token });

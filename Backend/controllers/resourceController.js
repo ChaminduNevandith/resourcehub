@@ -7,6 +7,18 @@ const {
   inMemory,
 } = require('../config/database');
 
+function serializeAmenities(value) {
+  if (Array.isArray(value)) return JSON.stringify(value);
+  if (typeof value === 'string') {
+    try {
+      return JSON.stringify(JSON.parse(value));
+    } catch {
+      return JSON.stringify([]);
+    }
+  }
+  return JSON.stringify([]);
+}
+
 async function getAllResources(req, res) {
   if (databaseState.ready) {
     const { rows } = await pool.query('SELECT * FROM resources ORDER BY name');
@@ -97,7 +109,9 @@ async function updateResource(req, res) {
     const nextResource = {
       ...current,
       ...updates,
-      amenities: updates.amenities ? JSON.stringify(updates.amenities) : current.amenities,
+      amenities: Object.prototype.hasOwnProperty.call(updates, 'amenities')
+        ? serializeAmenities(updates.amenities)
+        : serializeAmenities(current.amenities),
     };
 
     await pool.query(
@@ -123,7 +137,18 @@ async function deleteResource(req, res) {
     const { rows } = await pool.query('SELECT * FROM resources WHERE id = $1', [id]);
     if (!rows[0]) return res.status(404).json({ message: 'Resource not found.' });
 
-    await pool.query('DELETE FROM resources WHERE id = $1', [id]);
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query('DELETE FROM bookings WHERE "resourceId" = $1', [id]);
+      await client.query('DELETE FROM resources WHERE id = $1', [id]);
+      await client.query('COMMIT');
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
     return res.json({ id, deleted: true });
   }
 

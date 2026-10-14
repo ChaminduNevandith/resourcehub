@@ -7,14 +7,15 @@ const {
   updateResource,
   deleteResource,
 } = require('../controllers/resourceController');
+const { requireAuth, requireAdmin } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
 router.get('/', getAllResources);
 router.get('/:id', getResourceById);
 router.get('/:id/bookings', getResourceBookings);
-router.post('/', createResource);
-router.put('/:id', updateResource);
-router.delete('/:id', deleteResource);
+router.post('/', requireAuth, requireAdmin, createResource);
+router.put('/:id', requireAuth, requireAdmin, updateResource);
+router.delete('/:id', requireAuth, requireAdmin, deleteResource);
 
 module.exports = router;

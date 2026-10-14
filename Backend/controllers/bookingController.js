@@ -44,7 +44,8 @@ async function getBookingById(req, res) {
 }
 
 async function createBooking(req, res) {
-  const { userId, resourceId, startTime, endTime, status = 'pending', purpose = 'Requested reservation' } = req.body;
+  const { resourceId, startTime, endTime, status = 'pending', purpose = 'Requested reservation' } = req.body;
+  const userId = req.user?.id || req.body.userId;
 
   if (!userId || !resourceId || !startTime || !endTime) {
     return res.status(400).json({ message: 'userId, resourceId, startTime and endTime are required.' });
