@@ -15,6 +15,7 @@ const pool = new Pool(dbConfig);
 const databaseState = { ready: false };
 const validStatuses = ['confirmed', 'pending', 'cancelled', 'completed'];
 
+// Fallback data keeps the application usable when PostgreSQL is unavailable.
 const inMemory = {
   resources: [
     { id: 'r1', name: 'Harbor Boardroom', description: 'Executive meeting room with 4K display and video conferencing.', category: 'Meeting Rooms', location: 'Floor 12 - North Wing', capacity: 12, image: '/images/boardroom.svg', amenities: ['4K display', 'Video call', 'Whiteboard'], status: 'available' },
@@ -85,6 +86,7 @@ function hasBookingConflict(startTime, endTime, resourceId, ignoreBookingId = nu
     return false;
   }
 
+  // Ranges overlap when each starts before the other one ends.
   return getBookingsFallback().some((booking) => {
     if (booking.resourceId !== resourceId) return false;
     if (ignoreBookingId && booking.id === ignoreBookingId) return false;
@@ -98,6 +100,7 @@ function hasBookingConflict(startTime, endTime, resourceId, ignoreBookingId = nu
 
 async function initializeDatabase() {
   try {
+    // Create the schema and seed demo data on the first successful connection.
     await pool.query('SELECT 1');
     databaseState.ready = true;
 

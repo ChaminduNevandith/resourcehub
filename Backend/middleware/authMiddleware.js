@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const { pool, databaseState } = require('../config/database');
 
 async function requireAuth(req, res, next) {
+  // Resolve the bearer token to an active user before protected handlers run.
   if (!databaseState.ready) return res.status(503).json({ message: 'Database is unavailable.' });
   const header = req.headers.authorization || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
@@ -18,6 +19,7 @@ async function requireAuth(req, res, next) {
 }
 
 function requireAdmin(req, res, next) {
+  // Admin routes reuse the authenticated user attached by requireAuth.
   if (req.user?.role !== 'administrator') {
     return res.status(403).json({ message: 'Administrator access is required.' });
   }

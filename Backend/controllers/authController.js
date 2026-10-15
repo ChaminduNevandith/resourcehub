@@ -32,6 +32,7 @@ function getToken(req) {
 }
 
 async function createSession(userId) {
+  // Store only a hash of the session token in the database.
   const token = crypto.randomBytes(32).toString('hex');
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
   await pool.query(
@@ -42,6 +43,7 @@ async function createSession(userId) {
 }
 
 async function register(req, res) {
+  // New accounts always start as active employees.
   if (!databaseState.ready) return res.status(503).json({ message: 'Database is unavailable.' });
   const { name, email, password } = req.body;
   if (!name || !email || !password) return res.status(400).json({ message: 'name, email and password are required.' });
@@ -65,6 +67,7 @@ async function register(req, res) {
 }
 
 async function login(req, res) {
+  // Authenticate against active users before creating a session.
   if (!databaseState.ready) return res.status(503).json({ message: 'Database is unavailable.' });
   const { email, password, role } = req.body;
   if (!email || !password) return res.status(400).json({ message: 'email and password are required.' });

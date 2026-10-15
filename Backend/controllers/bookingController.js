@@ -15,6 +15,7 @@ const bookingSelect = `
 `;
 
 async function getAllBookings(req, res) {
+  // Include basic user details so booking cards can render without another request.
   if (databaseState.ready) {
     const { rows } = await pool.query(`${bookingSelect} ORDER BY b."createdAt" DESC`);
     return res.json(rows.map(normalizeBooking));
@@ -44,6 +45,7 @@ async function getBookingById(req, res) {
 }
 
 async function createBooking(req, res) {
+  // Validate the time range before checking conflicts or persisting the booking.
   const { resourceId, startTime, endTime, status = 'pending', purpose = 'Requested reservation' } = req.body;
   const userId = req.user?.id || req.body.userId;
 

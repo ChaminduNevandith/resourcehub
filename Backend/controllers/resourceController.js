@@ -20,6 +20,7 @@ function serializeAmenities(value) {
 }
 
 async function getAllResources(req, res) {
+  // Use PostgreSQL when available and keep the demo fallback usable otherwise.
   if (databaseState.ready) {
     const { rows } = await pool.query('SELECT * FROM resources ORDER BY name');
     return res.json(rows.map(normalizeResource));
@@ -67,6 +68,7 @@ async function getResourceBookings(req, res) {
 }
 
 async function createResource(req, res) {
+  // Normalize optional fields before writing a new catalog item.
   const { name, description, category, location, capacity, image, amenities, status = 'available' } = req.body;
 
   if (!name || !category || !location) {
@@ -139,6 +141,7 @@ async function deleteResource(req, res) {
 
     const client = await pool.connect();
     try {
+      // Remove dependent bookings in the same transaction as the resource.
       await client.query('BEGIN');
       await client.query('DELETE FROM bookings WHERE "resourceId" = $1', [id]);
       await client.query('DELETE FROM resources WHERE id = $1', [id]);
