@@ -20,6 +20,7 @@ export default function AdminResourcesPage() {
   const [category, setCategory] = useState("All");
   const [refreshKey, setRefreshKey] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
   const [editingResource, setEditingResource] = useState<Resource | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -39,24 +40,36 @@ export default function AdminResourcesPage() {
     });
   }, [category, query, refreshKey]);
 
-  const handleAdd = async () => {
+  const handleAddSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSaving(true);
+    setError(null);
+    const formData = new FormData(event.currentTarget);
+    const amenities = String(formData.get("amenities") ?? "")
+      .split(",")
+      .map((amenity) => amenity.trim())
+      .filter(Boolean);
+
     try {
       await createResource({
-      name: "New smart resource",
-      description: "Freshly added for demo management.",
-      category: "Other Resources",
-      location: "Floor 1",
-      capacity: 8,
-      image: "/images/boardroom.svg",
-      amenities: ["Flexible layout", "Display", "Power access"],
-      status: "available",
+        name: String(formData.get("name") ?? "").trim(),
+        description: String(formData.get("description") ?? "").trim(),
+        category: String(formData.get("category")) as ResourceCategory,
+        location: String(formData.get("location") ?? "").trim(),
+        capacity: Number(formData.get("capacity") ?? 0),
+        image: String(formData.get("image") ?? "").trim(),
+        amenities,
+        status: String(formData.get("status")) as ResourceStatus,
       });
+      setShowAddForm(false);
       setRefreshKey((value) => value + 1);
       await showSuccess("Resource added");
     } catch (submissionError) {
       const message = submissionError instanceof Error ? submissionError.message : "Could not add resource.";
       setError(message);
       await showError("Could not add resource", message);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -133,7 +146,7 @@ export default function AdminResourcesPage() {
               <p className="text-sm font-medium uppercase tracking-[0.18em] text-blue-600">Catalog</p>
               <h1 className="text-3xl font-semibold text-slate-900">Manage resources</h1>
             </div>
-            <Button onClick={handleAdd}><PlusCircle className="mr-2 h-4 w-4" /> Add resource</Button>
+            <Button onClick={() => { setError(null); setShowAddForm(true); }}><PlusCircle className="mr-2 h-4 w-4" /> Add resource</Button>
           </div>
           {error ? <p className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
 
@@ -175,6 +188,51 @@ export default function AdminResourcesPage() {
           </div>
         </main>
       </div>
+      {showAddForm ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/50 p-4">
+          <div role="dialog" aria-modal="true" aria-labelledby="add-resource-title" className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl">
+            <div className="mb-5 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium uppercase tracking-[0.18em] text-blue-600">Catalog</p>
+                <h2 id="add-resource-title" className="mt-1 text-2xl font-semibold text-slate-900">Add resource</h2>
+              </div>
+              <button type="button" aria-label="Close add resource dialog" onClick={() => setShowAddForm(false)} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <form onSubmit={handleAddSubmit} className="grid gap-4 md:grid-cols-2">
+              <Input label="Name" name="name" placeholder="Resource name" required />
+              <Input label="Location" name="location" placeholder="Floor or building" required />
+              <Select label="Category" name="category" defaultValue="Other Resources">
+                <option value="Meeting Rooms">Meeting Rooms</option>
+                <option value="Workspaces">Workspaces</option>
+                <option value="Equipment">Equipment</option>
+                <option value="Parking Spaces">Parking Spaces</option>
+                <option value="Other Resources">Other Resources</option>
+              </Select>
+              <Select label="Status" name="status" defaultValue="available">
+                <option value="available">Available</option>
+                <option value="reserved">Reserved</option>
+                <option value="maintenance">Maintenance</option>
+              </Select>
+              <Input label="Capacity" name="capacity" type="number" min="0" defaultValue="1" required />
+              <Input label="Image path" name="image" placeholder="/images/resource.svg" required />
+              <label className="flex flex-col gap-2 text-sm font-medium text-slate-700 md:col-span-2">
+                Description
+                <textarea name="description" rows={3} placeholder="Describe this resource" required className="rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+              </label>
+              <div className="flex flex-col gap-2 text-sm font-medium text-slate-700 md:col-span-2">
+                <span>Amenities <span className="font-normal text-slate-400">(comma separated)</span></span>
+                <Input name="amenities" placeholder="Display, Power access" />
+              </div>
+              <div className="flex justify-end gap-3 md:col-span-2">
+                <Button type="button" variant="secondary" onClick={() => setShowAddForm(false)}>Cancel</Button>
+                <Button type="submit" disabled={saving}>{saving ? "Adding..." : "Add resource"}</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
       {editingResource ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/50 p-4">
           <div role="dialog" aria-modal="true" aria-labelledby="edit-resource-title" className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl">
