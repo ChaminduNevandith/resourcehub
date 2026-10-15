@@ -12,6 +12,7 @@ import { Select } from "@/components/ui/Select";
 import { cancelBooking, getBookings, refreshBookings, updateBookingStatus } from "@/services/bookingService";
 import { getResourceById, getResources, refreshResources } from "@/services/resourceService";
 import { getStoredUser } from "@/services/authService";
+import { confirmAction, showError, showSuccess } from "@/lib/alerts";
 
 export default function AdminBookingsPage() {
   const router = useRouter();
@@ -43,9 +44,15 @@ export default function AdminBookingsPage() {
   }, [category, date, query, refreshKey, resourceId, status]);
 
   const handleReview = async (id: string, nextStatus: "confirmed" | "cancelled") => {
-    if (nextStatus === "cancelled") await cancelBooking(id);
-    else await updateBookingStatus(id, "confirmed");
-    setRefreshKey((value) => value + 1);
+    if (!await confirmAction(nextStatus === "cancelled" ? "Reject booking?" : "Approve booking?", "This will update the booking status.")) return;
+    try {
+      if (nextStatus === "cancelled") await cancelBooking(id);
+      else await updateBookingStatus(id, "confirmed");
+      setRefreshKey((value) => value + 1);
+      await showSuccess(nextStatus === "cancelled" ? "Booking rejected" : "Booking approved");
+    } catch (error) {
+      await showError("Unable to update booking", error instanceof Error ? error.message : undefined);
+    }
   };
 
   return (
