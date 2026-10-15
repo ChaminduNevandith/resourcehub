@@ -4,6 +4,7 @@ import type { Resource, ResourceCategory, ResourceStatus } from "@/types/resourc
 let resourceCache: Resource[] = [];
 let hasLoadedResources = false;
 
+// Keep resource reads fast while the page is using the server-backed catalog.
 export async function refreshResources() {
   try {
     const serverResources = await apiFetch<Resource[]>("/resources");

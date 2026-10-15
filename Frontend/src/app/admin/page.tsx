@@ -15,6 +15,8 @@ export default function AdminDashboardPage() {
   const router = useRouter();
   const [, setRefreshKey] = useState(0);
   const [userCount, setUserCount] = useState(0);
+
+  // Restrict the dashboard to administrators and load current summary data.
   useEffect(() => {
     if (getStoredUser()?.role !== "administrator") {
       router.replace("/dashboard");

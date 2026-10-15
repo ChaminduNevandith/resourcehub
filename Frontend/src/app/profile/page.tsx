@@ -41,6 +41,7 @@ export function ProfilePage({ adminOnly = false }: { adminOnly?: boolean }) {
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
+  // Resolve the stored user after mount and redirect users from the wrong profile area.
   useEffect(() => {
     const hydrationTask = window.setTimeout(() => {
       const storedUser = getStoredUser();

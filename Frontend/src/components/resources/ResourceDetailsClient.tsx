@@ -21,6 +21,7 @@ export function ResourceDetailsClient({ resource: initialResource, resourceId }:
   const [bookingMessage, setBookingMessage] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // Refresh both datasets so details and availability stay in sync.
   useEffect(() => {
     void Promise.all([refreshResources(), refreshBookings()]).then(() => {
       setResource(getResourceById(resourceId));

@@ -20,8 +20,11 @@ export default function ResourcesPage() {
   const [availability, setAvailability] = useState<(typeof availabilityOptions)[number]>("All");
   const [view, setView] = useState<"grid" | "list">("grid");
   const [refreshKey, setRefreshKey] = useState(0);
+
+  // Load the server catalog before applying the page filters.
   useEffect(() => { void refreshResources().then(() => setRefreshKey((value) => value + 1)); }, []);
 
+  // Keep search, category, and availability filters in one derived list.
   const resources = useMemo(() => {
     const all = getResources();
     return all.filter((resource) => {

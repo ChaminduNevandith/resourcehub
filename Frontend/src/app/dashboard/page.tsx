@@ -36,6 +36,7 @@ export default function DashboardPage() {
   const allBookings = getBookings();
   const upcoming = allBookings.filter((booking) => booking.status === "confirmed").slice(0, 3);
 
+  // Hydrate user details and refresh dashboard data after the client mounts.
   useEffect(() => {
     const hydrationTask = window.setTimeout(() => {
       const storedUser = getStoredUser();

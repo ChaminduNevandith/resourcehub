@@ -3,6 +3,7 @@ import { LoginForm } from "@/components/auth/LoginForm";
 
 export default function LoginPage() {
   return (
+    // Keep the sign-in form and product introduction together on larger screens.
     <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-10">
       <div className="grid w-full max-w-6xl overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-xl lg:grid-cols-2">
         <section className="hidden bg-gradient-to-br from-blue-600 via-blue-700 to-sky-500 p-10 text-white lg:flex lg:flex-col lg:justify-between">

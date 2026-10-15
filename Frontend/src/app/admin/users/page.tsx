@@ -19,6 +19,8 @@ export default function AdminUsersPage() {
   const [role, setRole] = useState("all");
   const [refreshKey, setRefreshKey] = useState(0);
   const [allUsers, setAllUsers] = useState<User[]>([]);
+
+  // Load users only after confirming the current user is an administrator.
   useEffect(() => {
     if (getStoredUser()?.role !== "administrator") {
       router.replace("/dashboard");
@@ -27,6 +29,7 @@ export default function AdminUsersPage() {
     void getUsers().then(setAllUsers);
   }, [refreshKey, router]);
 
+  // Keep the table results aligned with the search and role filters.
   const users = useMemo(() => {
     return allUsers.filter((user) => {
       const matchesRole = role === "all" || user.role === role;

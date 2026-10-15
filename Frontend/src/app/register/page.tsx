@@ -4,6 +4,7 @@ import { RegisterForm } from "@/components/auth/RegisterForm";
 
 export default function RegisterPage() {
   return (
+    // Registration stays focused in a single centered card.
     <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-10">
       <div className="w-full max-w-xl rounded-[28px] border border-slate-200 bg-white p-6 shadow-xl sm:p-8">
         <div className="mb-6 flex items-center justify-between">

@@ -22,6 +22,8 @@ export default function AdminBookingsPage() {
   const [resourceId, setResourceId] = useState("all");
   const [date, setDate] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
+
+  // Check access before loading the booking data used by the admin filters.
   useEffect(() => {
     if (getStoredUser()?.role !== "administrator") {
       router.replace("/dashboard");
@@ -31,6 +33,7 @@ export default function AdminBookingsPage() {
   }, [router]);
   const resources = getResources();
 
+  // Apply all admin filters to the current booking list.
   const bookings = useMemo(() => {
     return getBookings().filter((booking) => {
       const resource = getResourceById(booking.resourceId);

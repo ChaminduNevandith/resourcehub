@@ -15,6 +15,8 @@ export default function CalendarPage() {
   const [view, setView] = useState<"month" | "week">("month");
   const [resourceFilter, setResourceFilter] = useState("all");
   const [refreshKey, setRefreshKey] = useState(0);
+
+  // Refresh bookings and resources before building the calendar view.
   useEffect(() => {
     void Promise.all([refreshBookings(), refreshResources()]).then(() => setRefreshKey((value) => value + 1));
   }, []);

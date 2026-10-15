@@ -4,6 +4,7 @@ import type { Booking, BookingStatus } from "@/types/booking";
 let bookingCache: Booking[] = [];
 let hasLoadedBookings = false;
 
+// Load the latest bookings once, then reuse them for local lookups.
 export async function refreshBookings() {
   try {
     const serverBookings = await apiFetch<Booking[]>("/bookings");
@@ -42,6 +43,7 @@ export function hasBookingConflict(startTime: string, endTime: string, resourceI
     return false;
   }
 
+  // Two time ranges overlap when each starts before the other one ends.
   return getBookings().some((booking) => {
     if (booking.resourceId !== resourceId) return false;
     if (ignoreBookingId && booking.id === ignoreBookingId) return false;

@@ -19,6 +19,8 @@ export default function BookingsPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   useEffect(() => { void refreshBookings().then(() => setRefreshKey((value) => value + 1)); }, []);
   const currentUser = getStoredUser() ?? { id: "u1" } as never;
+
+  // Show only this user's bookings and the selected status.
   const bookings = useMemo(() => getBookings().filter((booking) => booking.userId === (currentUser.id ?? "u1") && (status === "all" || booking.status === status)), [currentUser.id, refreshKey, status]);
 
   const handleCancel = async (id: string) => {

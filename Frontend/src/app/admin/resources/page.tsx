@@ -22,6 +22,8 @@ export default function AdminResourcesPage() {
   const [error, setError] = useState<string | null>(null);
   const [editingResource, setEditingResource] = useState<Resource | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // Only administrators can manage the resource catalog.
    useEffect(() => {
     if (getStoredUser()?.role !== "administrator") {
       router.replace("/dashboard");
