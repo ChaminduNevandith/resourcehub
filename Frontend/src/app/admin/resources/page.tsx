@@ -12,6 +12,7 @@ import { Select } from "@/components/ui/Select";
 import { getResources, createResource, updateResource, toggleResourceStatus, deleteResource, refreshResources } from "@/services/resourceService";
 import { getStoredUser } from "@/services/authService";
 import type { Resource, ResourceCategory, ResourceStatus } from "@/types/resource";
+import { confirmAction, showError, showSuccess } from "@/lib/alerts";
 
 export default function AdminResourcesPage() {
   const router = useRouter();
@@ -49,8 +50,11 @@ export default function AdminResourcesPage() {
       status: "available",
       });
       setRefreshKey((value) => value + 1);
+      await showSuccess("Resource added");
     } catch (submissionError) {
-      setError(submissionError instanceof Error ? submissionError.message : "Could not add resource.");
+      const message = submissionError instanceof Error ? submissionError.message : "Could not add resource.";
+      setError(message);
+      await showError("Could not add resource", message);
     }
   };
 
@@ -60,18 +64,24 @@ export default function AdminResourcesPage() {
     try {
       await toggleResourceStatus(id, resource.status === "available" ? "maintenance" : "available");
       setRefreshKey((value) => value + 1);
+      await showSuccess("Resource status updated");
     } catch (submissionError) {
-      setError(submissionError instanceof Error ? submissionError.message : "Could not update resource.");
+      const message = submissionError instanceof Error ? submissionError.message : "Could not update resource.";
+      setError(message);
+      await showError("Could not update resource", message);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Delete this resource?")) return;
+    if (!await confirmAction("Delete resource?", "This resource will be removed from the catalog.")) return;
     try {
       await deleteResource(id);
       setRefreshKey((value) => value + 1);
+      await showSuccess("Resource deleted");
     } catch (submissionError) {
-      setError(submissionError instanceof Error ? submissionError.message : "Could not delete resource.");
+      const message = submissionError instanceof Error ? submissionError.message : "Could not delete resource.";
+      setError(message);
+      await showError("Could not delete resource", message);
     }
   };
 
@@ -100,8 +110,11 @@ export default function AdminResourcesPage() {
       });
       setEditingResource(null);
       setRefreshKey((value) => value + 1);
+      await showSuccess("Resource updated");
     } catch (submissionError) {
-      setError(submissionError instanceof Error ? submissionError.message : "Could not update resource.");
+      const message = submissionError instanceof Error ? submissionError.message : "Could not update resource.";
+      setError(message);
+      await showError("Could not update resource", message);
     } finally {
       setSaving(false);
     }

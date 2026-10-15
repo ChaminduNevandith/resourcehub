@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Building2, Sparkles } from "lucide-react";
 import { LoginForm } from "@/components/auth/LoginForm";
 
@@ -20,7 +19,6 @@ export default function LoginPage() {
           </div>
 
           <div className="grid gap-4 text-sm text-blue-50">
-            <div className="flex items-center gap-3 rounded-2xl bg-white/10 p-3"><Building2 className="h-5 w-5" /> Employee and admin demo flows</div>
             <div className="flex items-center gap-3 rounded-2xl bg-white/10 p-3"><Building2 className="h-5 w-5" /> Mock bookings with conflict detection</div>
           </div>
         </section>
@@ -30,11 +28,6 @@ export default function LoginPage() {
             <div className="mb-8 text-center lg:text-left">
               <p className="text-sm font-medium uppercase tracking-[0.25em] text-blue-600">Welcome back</p>
               <h2 className="mt-3 text-3xl font-semibold text-slate-900">Sign in to ResourceHub</h2>
-            </div>
-
-            <div className="mb-6 flex flex-wrap gap-2">
-              <Link href="/login" className="rounded-full bg-blue-600 px-3 py-1.5 text-sm font-medium text-white">Employee demo</Link>
-              <Link href="/login" className="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700">Admin preview</Link>
             </div>
 
             <LoginForm />

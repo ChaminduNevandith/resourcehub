@@ -12,6 +12,7 @@ import { Select } from "@/components/ui/Select";
 import { cancelBooking, getBookings, refreshBookings } from "@/services/bookingService";
 import { getResourceById } from "@/services/resourceService";
 import { getStoredUser } from "@/services/authService";
+import { confirmAction, showError, showSuccess } from "@/lib/alerts";
 
 export default function BookingsPage() {
   const [status, setStatus] = useState("all");
@@ -21,8 +22,14 @@ export default function BookingsPage() {
   const bookings = useMemo(() => getBookings().filter((booking) => booking.userId === (currentUser.id ?? "u1") && (status === "all" || booking.status === status)), [currentUser.id, refreshKey, status]);
 
   const handleCancel = async (id: string) => {
-    await cancelBooking(id);
-    setRefreshKey((value) => value + 1);
+    if (!await confirmAction("Cancel booking?", "This reservation will be cancelled.")) return;
+    try {
+      await cancelBooking(id);
+      setRefreshKey((value) => value + 1);
+      await showSuccess("Booking cancelled");
+    } catch (error) {
+      await showError("Unable to cancel booking", error instanceof Error ? error.message : undefined);
+    }
   };
 
   return (

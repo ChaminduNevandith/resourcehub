@@ -13,6 +13,7 @@ import { StatsCard } from "@/components/ui/StatsCard";
 import { getBookings, refreshBookings } from "@/services/bookingService";
 import { getResourceById, getResources, refreshResources } from "@/services/resourceService";
 import { getStoredUser } from "@/services/authService";
+import type { User } from "@/types/user";
 
 const utilizationData = [
   { name: "Mon", value: 54 },
@@ -26,16 +27,25 @@ const utilizationData = [
 export default function DashboardPage() {
   const [todayLabel, setTodayLabel] = useState("Loading date...");
   const [, setRefreshKey] = useState(0);
-  const activeUser = getStoredUser() ?? ({ id: "u1", role: "employee", name: "Ava Thompson" } as { id: string; role: "employee" | "administrator"; name: string });
+  const [activeUser, setActiveUser] = useState<Pick<User, "id" | "name" | "role">>({
+    id: "u1",
+    role: "employee",
+    name: "Ava Thompson",
+  });
   const resources = getResources();
   const allBookings = getBookings();
   const upcoming = allBookings.filter((booking) => booking.status === "confirmed").slice(0, 3);
 
   useEffect(() => {
+    const hydrationTask = window.setTimeout(() => {
+      const storedUser = getStoredUser();
+      if (storedUser) setActiveUser(storedUser);
+      setTodayLabel(
+        new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })
+      );
+    }, 0);
     void Promise.all([refreshBookings(), refreshResources()]).then(() => setRefreshKey((value) => value + 1));
-    setTodayLabel(
-      new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })
-    );
+    return () => window.clearTimeout(hydrationTask);
   }, []);
 
   return (

@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { getStoredUser, getUsers } from "@/services/authService";
 import type { User } from "@/types/user";
+import { confirmAction, showSuccess } from "@/lib/alerts";
 
 export default function AdminUsersPage() {
   const router = useRouter();
@@ -34,13 +35,15 @@ export default function AdminUsersPage() {
     });
   }, [allUsers, query, role]);
 
-  const toggleUser = (id: string) => {
+  const toggleUser = async (id: string) => {
     const list = allUsers;
     const current = list.find((user) => user.id === id);
     if (!current) return;
+    if (!await confirmAction(`${current.status === "active" ? "Deactivate" : "Activate"} user?`, `${current.name}'s account status will be changed.`)) return;
     current.status = current.status === "active" ? "inactive" : "active";
     setAllUsers([...list]);
     setRefreshKey((value) => value + 1);
+    await showSuccess(current.status === "active" ? "User activated" : "User deactivated");
   };
 
   return (
