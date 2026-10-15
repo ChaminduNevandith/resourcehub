@@ -54,30 +54,30 @@ export function RegisterForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div className="space-y-4">
         <div className="relative">
-          <UserRound className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
+          <UserRound className="pointer-events-none absolute left-3 top-[50px] h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
           <Input label="Full name" type="text" placeholder="Jordan Smith" className="pl-10" {...register("name")} />
         </div>
         {errors.name ? <p className="text-sm text-red-600">{errors.name.message}</p> : null}
 
         <div className="relative">
-          <Mail className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
+          <Mail className="pointer-events-none absolute left-3 top-[50px] h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
           <Input label="Email address" type="email" placeholder="name@company.com" className="pl-10" {...register("email")} />
         </div>
         {errors.email ? <p className="text-sm text-red-600">{errors.email.message}</p> : null}
 
         <div className="relative">
-          <LockKeyhole className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
+          <LockKeyhole className="pointer-events-none absolute left-3 top-[50px] h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
           <Input label="Password" type={showPassword ? "text" : "password"} placeholder="At least 8 characters" className="pl-10 pr-10" {...register("password")} />
-          <button type="button" className="absolute right-3 top-[46px] text-slate-500" onClick={() => setShowPassword((value) => !value)} aria-label="Show password">
+          <button type="button" className="absolute right-2 top-[50px] flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-slate-500 transition-colors hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword}>
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
         {errors.password ? <p className="text-sm text-red-600">{errors.password.message}</p> : null}
 
         <div className="relative">
-          <LockKeyhole className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
+          <LockKeyhole className="pointer-events-none absolute left-3 top-[50px] h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
           <Input label="Confirm password" type={showConfirm ? "text" : "password"} placeholder="Repeat password" className="pl-10 pr-10" {...register("confirmPassword")} />
-          <button type="button" className="absolute right-3 top-[46px] text-slate-500" onClick={() => setShowConfirm((value) => !value)} aria-label="Show confirm password">
+          <button type="button" className="absolute right-2 top-[50px] flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-slate-500 transition-colors hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" onClick={() => setShowConfirm((value) => !value)} aria-label={showConfirm ? "Hide confirm password" : "Show confirm password"} aria-pressed={showConfirm}>
             {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>

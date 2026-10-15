@@ -25,8 +25,16 @@ export function ResourceCard({ resource }: { resource: Resource }) {
         <p className="line-clamp-3 text-sm text-slate-600">{resource.description}</p>
 
         <div className="flex items-center justify-between text-sm text-slate-600">
-          <span className="inline-flex items-center gap-2"><MapPin className="h-4 w-4" /> {resource.location}</span>
-          {resource.capacity ? <span className="inline-flex items-center gap-2"><Users className="h-4 w-4" /> {resource.capacity} seats</span> : null}
+          <span className="inline-flex min-w-0 items-center gap-2">
+            <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span className="truncate">{resource.location}</span>
+          </span>
+          {resource.capacity ? (
+            <span className="inline-flex shrink-0 items-center gap-2">
+              <Users className="h-4 w-4 shrink-0" aria-hidden="true" />
+              {resource.capacity} seats
+            </span>
+          ) : null}
         </div>
 
         <div className="flex flex-wrap gap-2">

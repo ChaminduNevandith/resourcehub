@@ -37,28 +37,7 @@ export function Navbar({ role = "employee", canAccessAdmin = false }: { role?: "
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-3">
-          <button type="button" className="rounded-xl border border-slate-200 p-2 lg:hidden" onClick={() => setMobileOpen((value) => !value)}>
-            <Menu className="h-5 w-5 text-slate-700" />
-          </button>
-          <Link href={role === "administrator" ? "/admin" : "/dashboard"} className="flex items-center gap-2 font-semibold text-slate-900">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-sm text-white">RH</span>
-            <span>ResourceHub</span>
-          </Link>
-        </div>
-
-        <div className="hidden flex-1 items-center justify-center lg:flex">
-          <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500">
-            <Search className="h-4 w-4" />
-            <input
-              aria-label="Search"
-              className="w-72 border-0 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
-              placeholder="Search resources, bookings..."
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-3">
           <button type="button" className="rounded-xl border border-slate-200 p-2 text-slate-600">
             <Bell className="h-4 w-4" />
           </button>

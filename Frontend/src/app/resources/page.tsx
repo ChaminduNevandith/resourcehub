@@ -53,8 +53,12 @@ export default function ResourcesPage() {
           </div>
 
           <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-700">
+              <Filter className="h-4 w-4 shrink-0 text-blue-600" aria-hidden="true" />
+              Filter resources
+            </div>
             <div className="grid gap-4 lg:grid-cols-[1.5fr_0.9fr_0.7fr]">
-              <SearchBar value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by resource, location, or amenity" />
+              <SearchBar label="Search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by resource, location, or amenity" />
               <Select label="Category" value={category} onChange={(event) => setCategory(event.target.value as (typeof categories)[number])}>
                 {categories.map((option) => (
                   <option key={option} value={option}>{option}</option>
@@ -69,12 +73,12 @@ export default function ResourcesPage() {
           </div>
 
           <div className="mb-4 flex items-center gap-2 text-sm text-slate-500">
-            <Filter className="h-4 w-4" />
+            <Filter className="h-4 w-4 shrink-0" aria-hidden="true" />
             {resources.length} resources found
           </div>
 
           {resources.length ? (
-            <div className={view === "grid" ? "grid gap-5 md:grid-cols-2 xl:grid-cols-3" : "space-y-4"}>
+            <div className={view === "grid" ? "grid gap-5 md:grid-cols-2 xl:grid-cols-4" : "space-y-4"}>
               {resources.map((resource) => (
                 <div key={resource.id} className={view === "list" ? "max-w-none" : ""}>
                   <ResourceCard resource={resource} />
