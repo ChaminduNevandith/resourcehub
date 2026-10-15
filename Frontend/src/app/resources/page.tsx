@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Filter } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { ResourceCard } from "@/components/ResourceCard";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { Select } from "@/components/ui/Select";
-import { getResources } from "@/services/resourceService";
+import { getResources, refreshResources } from "@/services/resourceService";
 
 const categories = ["All", "Meeting Rooms", "Workspaces", "Equipment", "Parking Spaces", "Other Resources"] as const;
 const availabilityOptions = ["All", "available", "reserved", "maintenance"] as const;
@@ -19,6 +19,8 @@ export default function ResourcesPage() {
   const [category, setCategory] = useState<(typeof categories)[number]>("All");
   const [availability, setAvailability] = useState<(typeof availabilityOptions)[number]>("All");
   const [view, setView] = useState<"grid" | "list">("grid");
+  const [refreshKey, setRefreshKey] = useState(0);
+  useEffect(() => { void refreshResources().then(() => setRefreshKey((value) => value + 1)); }, []);
 
   const resources = useMemo(() => {
     const all = getResources();
@@ -28,7 +30,7 @@ export default function ResourcesPage() {
       const matchesAvailability = availability === "All" || resource.status === availability;
       return matchesQuery && matchesCategory && matchesAvailability;
     });
-  }, [availability, category, query]);
+  }, [availability, category, query, refreshKey]);
 
   return (
     <div className="flex min-h-screen bg-slate-100">

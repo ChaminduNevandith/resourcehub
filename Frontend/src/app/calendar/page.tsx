@@ -1,20 +1,27 @@
 "use client";
 
 import { eachDayOfInterval, endOfMonth, endOfWeek, format, isSameDay, startOfMonth, startOfWeek } from "date-fns";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CalendarDays } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Select } from "@/components/ui/Select";
-import { getBookings } from "@/services/bookingService";
-import { getResourceById } from "@/services/resourceService";
+import { getBookings, refreshBookings } from "@/services/bookingService";
+import { getResourceById, refreshResources } from "@/services/resourceService";
 
 export default function CalendarPage() {
   const [view, setView] = useState<"month" | "week">("month");
   const [resourceFilter, setResourceFilter] = useState("all");
-  const bookings = getBookings().filter((booking) => resourceFilter === "all" || booking.resourceId === resourceFilter);
+  const [refreshKey, setRefreshKey] = useState(0);
+  useEffect(() => {
+    void Promise.all([refreshBookings(), refreshResources()]).then(() => setRefreshKey((value) => value + 1));
+  }, []);
+  const bookings = useMemo(
+    () => getBookings().filter((booking) => resourceFilter === "all" || booking.resourceId === resourceFilter),
+    [resourceFilter, refreshKey],
+  );
 
   const now = new Date("2026-10-01T00:00:00Z");
   const monthDays = eachDayOfInterval({ start: startOfWeek(startOfMonth(now), { weekStartsOn: 1 }), end: endOfWeek(endOfMonth(now), { weekStartsOn: 1 }) });
@@ -64,6 +71,7 @@ export default function CalendarPage() {
                         {dayBookings.slice(0, 2).map((booking) => (
                           <div key={booking.id} className="rounded bg-blue-50 px-1 py-0.5 text-[10px] font-medium text-blue-700">
                             {getResourceById(booking.resourceId)?.name ?? "Resource"}
+                            <span className="block truncate text-blue-600">{booking.bookedByName ?? booking.userId}</span>
                           </div>
                         ))}
                       </div>
@@ -83,6 +91,7 @@ export default function CalendarPage() {
                       <div key={booking.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm">
                         <p className="font-medium text-slate-900">{resource?.name ?? "Resource"}</p>
                         <p className="text-slate-600">{new Date(booking.startTime).toLocaleDateString()} • {booking.status}</p>
+                        <p className="mt-1 text-slate-500">Booked by: {booking.bookedByName ?? booking.userId}</p>
                       </div>
                     );
                   })}

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, CalendarCheck2, CheckCircle2, MapPin, Sparkles, Users } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
 import { BookingForm } from "@/components/BookingForm";
@@ -11,14 +11,24 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { createBooking, getBookingsForResource, hasBookingConflict } from "@/services/bookingService";
+import { createBooking, getBookingsForResource, hasBookingConflict, refreshBookings } from "@/services/bookingService";
 import { getStoredUser } from "@/services/authService";
+import { getResourceById, refreshResources } from "@/services/resourceService";
 import type { Resource } from "@/types/resource";
 
-export function ResourceDetailsClient({ resource }: { resource: Resource | null }) {
+export function ResourceDetailsClient({ resource: initialResource, resourceId }: { resource: Resource | null; resourceId: string }) {
+  const [resource, setResource] = useState(initialResource);
   const [bookingMessage, setBookingMessage] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const existingBookings = useMemo(() => getBookingsForResource(resource?.id ?? ""), [resource?.id]);
+  useEffect(() => {
+    void Promise.all([refreshResources(), refreshBookings()]).then(() => {
+      setResource(getResourceById(resourceId));
+      setRefreshKey((value) => value + 1);
+    });
+  }, [resourceId]);
+
+  const existingBookings = useMemo(() => getBookingsForResource(resource?.id ?? ""), [resource?.id, refreshKey]);
 
   if (!resource) {
     return (
@@ -34,7 +44,7 @@ export function ResourceDetailsClient({ resource }: { resource: Resource | null 
     );
   }
 
-  const handleSubmit = ({ date, startTime, endTime }: { date: string; startTime: string; endTime: string }) => {
+  const handleSubmit = async ({ date, startTime, endTime }: { date: string; startTime: string; endTime: string }) => {
     const start = new Date(`${date}T${startTime}`);
     const end = new Date(`${date}T${endTime}`);
 
@@ -50,16 +60,21 @@ export function ResourceDetailsClient({ resource }: { resource: Resource | null 
       return { ok: false, message: "This time slot overlaps with an existing reservation." };
     }
 
-    createBooking({
+    try {
+      await createBooking({
       userId: user?.id ?? "u1",
       resourceId: resource.id,
       startTime: inIso,
       endTime: outIso,
       status: "pending",
       purpose: "Requested reservation",
-    });
+      });
+    } catch (error) {
+      return { ok: false, message: error instanceof Error ? error.message : "Unable to create the reservation." };
+    }
 
-    setBookingMessage("Reservation submitted successfully. It is visible in the mock booking store.");
+    setBookingMessage("Reservation submitted successfully.");
+    setRefreshKey((value) => value + 1);
     return { ok: true, message: "Reservation submitted successfully." };
   };
 

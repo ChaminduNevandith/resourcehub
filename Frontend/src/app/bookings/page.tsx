@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
@@ -9,18 +9,19 @@ import { BookingCard } from "@/components/BookingCard";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Select } from "@/components/ui/Select";
-import { cancelBooking, getBookings } from "@/services/bookingService";
+import { cancelBooking, getBookings, refreshBookings } from "@/services/bookingService";
 import { getResourceById } from "@/services/resourceService";
 import { getStoredUser } from "@/services/authService";
 
 export default function BookingsPage() {
   const [status, setStatus] = useState("all");
   const [refreshKey, setRefreshKey] = useState(0);
+  useEffect(() => { void refreshBookings().then(() => setRefreshKey((value) => value + 1)); }, []);
   const currentUser = getStoredUser() ?? { id: "u1" } as never;
   const bookings = useMemo(() => getBookings().filter((booking) => booking.userId === (currentUser.id ?? "u1") && (status === "all" || booking.status === status)), [currentUser.id, refreshKey, status]);
 
-  const handleCancel = (id: string) => {
-    cancelBooking(id);
+  const handleCancel = async (id: string) => {
+    await cancelBooking(id);
     setRefreshKey((value) => value + 1);
   };
 

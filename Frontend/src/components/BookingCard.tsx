@@ -23,6 +23,7 @@ export function BookingCard({ booking, resource }: { booking: Booking; resource:
         <div className="flex items-center gap-2"><CalendarDays className="h-4 w-4" /> {new Date(booking.startTime).toLocaleDateString()}</div>
         <div className="flex items-center gap-2"><Clock3 className="h-4 w-4" /> {new Date(booking.startTime).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} - {new Date(booking.endTime).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</div>
         <div className="flex items-center gap-2"><MapPin className="h-4 w-4" /> {resource.location}</div>
+        <div className="text-sm text-slate-500">Booked by: {booking.bookedByName ?? booking.userId}</div>
       </div>
 
       <p className="mt-4 rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-600">Purpose: {booking.purpose}</p>

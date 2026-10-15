@@ -14,7 +14,7 @@ export function BookingForm({
   defaultEnd,
 }: {
   resourceName: string;
-  onSubmit: (values: { date: string; startTime: string; endTime: string }) => { ok: boolean; message?: string };
+  onSubmit: (values: { date: string; startTime: string; endTime: string }) => { ok: boolean; message?: string } | Promise<{ ok: boolean; message?: string }>;
   initialDate?: string;
   defaultStart?: string;
   defaultEnd?: string;
@@ -35,9 +35,11 @@ export function BookingForm({
     return `${resourceName} • ${format(start, "MMM d, yyyy")} • ${format(start, "h:mm aa")} - ${format(end, "h:mm aa")}`;
   }, [date, endTime, resourceName, startTime]);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const result = onSubmit({ date, startTime, endTime });
+    const confirmed = window.confirm(`Confirm booking for ${summary}?`);
+    if (!confirmed) return;
+    const result = await onSubmit({ date, startTime, endTime });
     setFeedback(result.ok ? { type: "success", text: result.message ?? "Booking request created successfully." } : { type: "error", text: result.message ?? "Unable to create the booking." });
   };
 

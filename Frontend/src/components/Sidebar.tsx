@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BarChart3, BookText, CalendarRange, Building2, LayoutDashboard, ShieldCheck, UserRound, Warehouse } from "lucide-react";
 
-export function Sidebar({ role = "employee" }: { role?: "employee" | "administrator" }) {
+export function Sidebar({ role = "employee", canAccessAdmin = false }: { role?: "employee" | "administrator"; canAccessAdmin?: boolean }) {
   const pathname = usePathname();
 
   const employeeLinks = [
@@ -20,9 +20,14 @@ export function Sidebar({ role = "employee" }: { role?: "employee" | "administra
     { href: "/admin/resources", label: "Resources", icon: Building2 },
     { href: "/admin/bookings", label: "Bookings", icon: BookText },
     { href: "/admin/users", label: "Users", icon: ShieldCheck },
+    { href: "/dashboard", label: "Employee preview", icon: LayoutDashboard },
   ];
 
-  const links = role === "administrator" ? adminLinks : employeeLinks;
+  const links = role === "administrator"
+    ? adminLinks
+    : canAccessAdmin
+      ? [...employeeLinks, { href: "/admin", label: "Admin panel", icon: ShieldCheck }]
+      : employeeLinks;
 
   return (
     <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-slate-50/80 p-5 lg:block">

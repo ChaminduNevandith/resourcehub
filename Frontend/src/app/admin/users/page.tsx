@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
@@ -8,26 +9,37 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { getDemoUsers } from "@/services/authService";
+import { getStoredUser, getUsers } from "@/services/authService";
+import type { User } from "@/types/user";
 
 export default function AdminUsersPage() {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [role, setRole] = useState("all");
   const [refreshKey, setRefreshKey] = useState(0);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  useEffect(() => {
+    if (getStoredUser()?.role !== "administrator") {
+      router.replace("/dashboard");
+      return;
+    }
+    void getUsers().then(setAllUsers);
+  }, [refreshKey, router]);
 
   const users = useMemo(() => {
-    return getDemoUsers().filter((user) => {
+    return allUsers.filter((user) => {
       const matchesRole = role === "all" || user.role === role;
       const matchesQuery = !query || `${user.name} ${user.email}`.toLowerCase().includes(query.toLowerCase());
       return matchesRole && matchesQuery;
     });
-  }, [query, refreshKey, role]);
+  }, [allUsers, query, role]);
 
   const toggleUser = (id: string) => {
-    const list = getDemoUsers();
+    const list = allUsers;
     const current = list.find((user) => user.id === id);
     if (!current) return;
     current.status = current.status === "active" ? "inactive" : "active";
+    setAllUsers([...list]);
     setRefreshKey((value) => value + 1);
   };
 

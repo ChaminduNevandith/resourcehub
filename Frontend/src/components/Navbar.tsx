@@ -4,16 +4,16 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, LogOut, Menu, Search, UserCircle } from "lucide-react";
 import { useState } from "react";
-import { clearStoredUser } from "@/services/authService";
+import { signOut } from "@/services/authService";
 import { Button } from "@/components/ui/Button";
 
-export function Navbar({ role = "employee" }: { role?: "employee" | "administrator" }) {
+export function Navbar({ role = "employee", canAccessAdmin = false }: { role?: "employee" | "administrator"; canAccessAdmin?: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const handleLogout = () => {
-    clearStoredUser();
+  const handleLogout = async () => {
+    await signOut();
     router.push("/login");
   };
 
@@ -23,6 +23,7 @@ export function Navbar({ role = "employee" }: { role?: "employee" | "administrat
         { href: "/admin/resources", label: "Resources" },
         { href: "/admin/bookings", label: "Bookings" },
         { href: "/admin/users", label: "Users" },
+        { href: "/dashboard", label: "Employee preview" },
       ]
     : [
         { href: "/dashboard", label: "Dashboard" },
@@ -64,6 +65,16 @@ export function Navbar({ role = "employee" }: { role?: "employee" | "administrat
             <UserCircle className="h-4 w-4" />
             {role === "administrator" ? "Admin" : "Employee"}
           </Link>
+          {role === "administrator" ? (
+            <Link href="/dashboard" className="hidden rounded-xl border border-blue-200 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50 sm:inline-flex">
+              Employee preview
+            </Link>
+          ) : null}
+          {role === "employee" && canAccessAdmin ? (
+            <Link href="/admin" className="hidden rounded-xl border border-blue-200 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50 sm:inline-flex">
+              Admin panel
+            </Link>
+          ) : null}
           <Button variant="secondary" size="sm" onClick={handleLogout}> <LogOut className="mr-2 h-4 w-4" /> Logout</Button>
         </div>
       </div>
@@ -81,6 +92,15 @@ export function Navbar({ role = "employee" }: { role?: "employee" | "administrat
                 {item.label}
               </Link>
             ))}
+            {role === "employee" && canAccessAdmin ? (
+              <Link
+                href="/admin"
+                className={`rounded-xl px-3 py-2 text-sm font-medium ${pathname === "/admin" ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-100"}`}
+                onClick={() => setMobileOpen(false)}
+              >
+                Admin panel
+              </Link>
+            ) : null}
           </div>
         </nav>
       ) : null}

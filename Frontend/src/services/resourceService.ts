@@ -1,8 +1,7 @@
-import { resources as mockResources } from "@/lib/mockData";
 import { apiFetch } from "@/services/api";
 import type { Resource, ResourceCategory, ResourceStatus } from "@/types/resource";
 
-let resourceCache: Resource[] = [...mockResources];
+let resourceCache: Resource[] = [];
 let hasLoadedResources = false;
 
 export async function refreshResources() {
@@ -13,15 +12,15 @@ export async function refreshResources() {
       hasLoadedResources = true;
     }
   } catch (error) {
-    console.warn("Unable to load resources from backend; using local fallback data.", error);
-    resourceCache = [...mockResources];
+    console.error("Unable to load resources from backend.", error);
+    resourceCache = [];
   }
 
   return resourceCache;
 }
 
 export function getResources() {
-  if (!hasLoadedResources) {
+  if (!hasLoadedResources && typeof window !== "undefined") {
     void refreshResources();
   }
   return resourceCache;
@@ -47,43 +46,27 @@ export function searchResources(query: string, category?: ResourceCategory) {
   });
 }
 
-export function createResource(payload: Omit<Resource, "id">) {
-  const nextResource: Resource = {
-    ...payload,
-    id: `r${Date.now()}`,
-  };
-
-  const current = getResources();
-  const updated = [...current, nextResource];
-  resourceCache = updated;
-
-  void apiFetch<Resource>("/resources", {
+export async function createResource(payload: Omit<Resource, "id">) {
+  const serverResource = await apiFetch<Resource>("/resources", {
     method: "POST",
     body: JSON.stringify(payload),
-  }).then((serverResource) => {
-    resourceCache = resourceCache.map((item) => item.id === nextResource.id ? serverResource : item);
-  }).catch((error) => {
-    console.warn("Could not sync new resource to backend.", error);
   });
 
-  return nextResource;
+  resourceCache = [...getResources(), serverResource];
+  return serverResource;
 }
 
-export function updateResource(id: string, updates: Partial<Resource>) {
+export async function updateResource(id: string, updates: Partial<Resource>) {
   const current = getResources();
   const index = current.findIndex((resource) => resource.id === id);
   if (index < 0) return null;
 
-  const updatedResource = { ...current[index], ...updates };
-  resourceCache = current.map((resource) => (resource.id === id ? updatedResource : resource));
-
-  void apiFetch<Resource>(`/resources/${id}`, {
+  const updatedResource = await apiFetch<Resource>(`/resources/${id}`, {
     method: "PUT",
     body: JSON.stringify(updates),
-  }).catch((error) => {
-    console.warn("Could not sync resource update to backend.", error);
   });
 
+  resourceCache = current.map((resource) => (resource.id === id ? updatedResource : resource));
   return updatedResource;
 }
 
@@ -91,18 +74,15 @@ export function toggleResourceStatus(id: string, status: ResourceStatus) {
   return updateResource(id, { status });
 }
 
-export function deleteResource(id: string) {
+export async function deleteResource(id: string) {
   const current = getResources();
   const index = current.findIndex((resource) => resource.id === id);
   if (index < 0) return false;
 
-  resourceCache = current.filter((resource) => resource.id !== id);
-
-  void apiFetch<{ deleted: boolean }>(`/resources/${id}`, {
+  await apiFetch<{ deleted: boolean }>(`/resources/${id}`, {
     method: "DELETE",
-  }).catch((error) => {
-    console.warn("Could not delete resource on backend.", error);
   });
 
+  resourceCache = current.filter((resource) => resource.id !== id);
   return true;
 }

@@ -9,4 +9,6 @@ export interface Booking {
   status: BookingStatus;
   purpose: string;
   createdAt: string;
+  bookedByName?: string | null;
+  bookedByEmail?: string | null;
 }

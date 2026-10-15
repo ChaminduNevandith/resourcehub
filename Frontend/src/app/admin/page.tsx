@@ -1,18 +1,30 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { BarChart3, Building2, CalendarRange, Users } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
 import { Card } from "@/components/ui/Card";
 import { StatsCard } from "@/components/ui/StatsCard";
-import { getBookings } from "@/services/bookingService";
-import { getResources } from "@/services/resourceService";
-import { getDemoUsers } from "@/services/authService";
+import { getBookings, refreshBookings } from "@/services/bookingService";
+import { getResources, refreshResources } from "@/services/resourceService";
+import { getStoredUser, getUsers } from "@/services/authService";
 
 export default function AdminDashboardPage() {
+  const router = useRouter();
+  const [, setRefreshKey] = useState(0);
+  const [userCount, setUserCount] = useState(0);
+  useEffect(() => {
+    if (getStoredUser()?.role !== "administrator") {
+      router.replace("/dashboard");
+      return;
+    }
+    void Promise.all([refreshBookings(), refreshResources()]).then(() => setRefreshKey((value) => value + 1));
+    void getUsers().then((users) => setUserCount(users.length));
+  }, [router]);
   const resources = getResources();
   const bookings = getBookings();
-  const users = getDemoUsers();
 
   return (
     <div className="flex min-h-screen bg-slate-100">
@@ -26,7 +38,7 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <StatsCard title="Total users" value={String(users.length)} detail="Across the workspace" icon={<Users className="h-5 w-5" />} />
+            <StatsCard title="Total users" value={String(userCount)} detail="Across the workspace" icon={<Users className="h-5 w-5" />} />
             <StatsCard title="Total resources" value={String(resources.length)} detail="Including shared assets" icon={<Building2 className="h-5 w-5" />} />
             <StatsCard title="Total bookings" value={String(bookings.length)} detail="Reservation records" icon={<CalendarRange className="h-5 w-5" />} />
             <StatsCard title="Active reservations" value={String(bookings.filter((booking) => booking.status === "confirmed").length)} detail="Currently active" icon={<BarChart3 className="h-5 w-5" />} />

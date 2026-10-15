@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Activity, ArrowRight, BookText, CalendarRange, Clock3, MapPinned, Plus, TrendingUp } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Navbar } from "@/components/Navbar";
@@ -10,8 +10,8 @@ import { BookingCard } from "@/components/BookingCard";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { StatsCard } from "@/components/ui/StatsCard";
-import { getBookings } from "@/services/bookingService";
-import { getResourceById, getResources } from "@/services/resourceService";
+import { getBookings, refreshBookings } from "@/services/bookingService";
+import { getResourceById, getResources, refreshResources } from "@/services/resourceService";
 import { getStoredUser } from "@/services/authService";
 
 const utilizationData = [
@@ -25,12 +25,14 @@ const utilizationData = [
 
 export default function DashboardPage() {
   const [todayLabel, setTodayLabel] = useState("Loading date...");
+  const [, setRefreshKey] = useState(0);
   const activeUser = getStoredUser() ?? ({ id: "u1", role: "employee", name: "Ava Thompson" } as { id: string; role: "employee" | "administrator"; name: string });
   const resources = getResources();
   const allBookings = getBookings();
   const upcoming = allBookings.filter((booking) => booking.status === "confirmed").slice(0, 3);
 
   useEffect(() => {
+    void Promise.all([refreshBookings(), refreshResources()]).then(() => setRefreshKey((value) => value + 1));
     setTodayLabel(
       new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })
     );
@@ -38,9 +40,9 @@ export default function DashboardPage() {
 
   return (
     <div className="flex min-h-screen bg-slate-100">
-      <Sidebar role={activeUser.role === "administrator" ? "administrator" : "employee"} />
+      <Sidebar role="employee" canAccessAdmin={activeUser.role === "administrator"} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <Navbar role={activeUser.role === "administrator" ? "administrator" : "employee"} />
+        <Navbar role="employee" canAccessAdmin={activeUser.role === "administrator"} />
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
