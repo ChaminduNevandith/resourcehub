@@ -6,6 +6,7 @@ import { Bell, LogOut, Menu, Search, UserCircle } from "lucide-react";
 import { useState } from "react";
 import { signOut } from "@/services/authService";
 import { Button } from "@/components/ui/Button";
+import { confirmAction } from "@/lib/alerts";
 
 export function Navbar({ role = "employee", canAccessAdmin = false }: { role?: "employee" | "administrator"; canAccessAdmin?: boolean }) {
   const pathname = usePathname();
@@ -13,6 +14,7 @@ export function Navbar({ role = "employee", canAccessAdmin = false }: { role?: "
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = async () => {
+    if (!await confirmAction("Log out?", "You will need to sign in again to access your account.")) return;
     await signOut();
     router.push("/login");
   };
@@ -23,7 +25,6 @@ export function Navbar({ role = "employee", canAccessAdmin = false }: { role?: "
         { href: "/admin/resources", label: "Resources" },
         { href: "/admin/bookings", label: "Bookings" },
         { href: "/admin/users", label: "Users" },
-        { href: "/dashboard", label: "Employee preview" },
       ]
     : [
         { href: "/dashboard", label: "Dashboard" },
@@ -61,10 +62,10 @@ export function Navbar({ role = "employee", canAccessAdmin = false }: { role?: "
           <button type="button" className="rounded-xl border border-slate-200 p-2 text-slate-600">
             <Bell className="h-4 w-4" />
           </button>
-          <Link href="/profile" className="hidden items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 sm:flex">
+          <button className="hidden items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 sm:flex">
             <UserCircle className="h-4 w-4" />
             {role === "administrator" ? "Admin" : "Employee"}
-          </Link>
+          </button>
           {role === "administrator" ? (
             <Link href="/dashboard" className="hidden rounded-xl border border-blue-200 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50 sm:inline-flex">
               Employee preview

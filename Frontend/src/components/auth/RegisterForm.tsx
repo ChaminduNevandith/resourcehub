@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { registerUser } from "@/services/authService";
+import { showError, showSuccess } from "@/lib/alerts";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Full name is required."),
@@ -38,9 +39,12 @@ export function RegisterForm() {
 
     try {
       await registerUser(values.name, values.email, values.password);
+      await showSuccess("Account created", "Welcome to ResourceHub.");
       router.push("/dashboard");
     } catch (submissionError) {
-      setError(submissionError instanceof Error ? submissionError.message : "Registration failed.");
+      const message = submissionError instanceof Error ? submissionError.message : "Registration failed.";
+      setError(message);
+      await showError("Registration failed", message);
     } finally {
       setLoading(false);
     }

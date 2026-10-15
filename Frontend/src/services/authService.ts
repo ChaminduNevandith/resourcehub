@@ -10,10 +10,10 @@ function saveSession(user: User, token: string) {
   window.localStorage.setItem(TOKEN_KEY, token);
 }
 
-export async function signIn(email: string, password: string, role?: User["role"]): Promise<User> {
+export async function signIn(email: string, password: string): Promise<User> {
   const result = await apiFetch<{ user: User; token: string }>("/auth/login", {
     method: "POST",
-    body: JSON.stringify({ email, password, role }),
+    body: JSON.stringify({ email, password }),
   });
   saveSession(result.user, result.token);
   return result.user;
@@ -30,6 +30,23 @@ export async function registerUser(name: string, email: string, password: string
 
 export async function getUsers(): Promise<User[]> {
   return apiFetch<User[]>("/auth/users");
+}
+
+export async function updateUserDetails(name: string, email: string): Promise<User> {
+  const user = await apiFetch<User>("/auth/me", {
+    method: "PUT",
+    body: JSON.stringify({ name, email }),
+  });
+  const token = typeof window !== "undefined" ? window.localStorage.getItem(TOKEN_KEY) : null;
+  if (token) saveSession(user, token);
+  return user;
+}
+
+export async function updatePassword(currentPassword: string, newPassword: string): Promise<void> {
+  await apiFetch<void>("/auth/me/password", {
+    method: "PUT",
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
 }
 
 export async function signOut() {

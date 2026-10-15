@@ -50,7 +50,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex min-h-screen bg-slate-100">
-      <Sidebar role="employee" canAccessAdmin={activeUser.role === "administrator"} />
+      <Sidebar role="employee" />
       <div className="flex min-w-0 flex-1 flex-col">
         <Navbar role="employee" canAccessAdmin={activeUser.role === "administrator"} />
         <main className="flex-1 p-4 sm:p-6 lg:p-8">

@@ -54,7 +54,7 @@ export function ProfilePage({ adminOnly = false }: { adminOnly?: boolean }) {
       }
 
       if (storedUser?.role === "administrator") {
-        router.replace("/admin/profile");
+        router.replace("/profile");
         return;
       }
       if (storedUser) setUser(storedUser);

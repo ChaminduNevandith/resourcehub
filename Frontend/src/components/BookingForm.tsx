@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { CalendarRange, Clock3, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { confirmAction, showError, showSuccess } from "@/lib/alerts";
 
 export function BookingForm({
   resourceName,
@@ -37,9 +38,14 @@ export function BookingForm({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const confirmed = window.confirm(`Confirm booking for ${summary}?`);
+    const confirmed = await confirmAction("Confirm booking", summary);
     if (!confirmed) return;
     const result = await onSubmit({ date, startTime, endTime });
+    if (result.ok) {
+      await showSuccess("Booking submitted", result.message ?? "Booking request created successfully.");
+    } else {
+      await showError("Booking failed", result.message ?? "Unable to create the booking.");
+    }
     setFeedback(result.ok ? { type: "success", text: result.message ?? "Booking request created successfully." } : { type: "error", text: result.message ?? "Unable to create the booking." });
   };
 

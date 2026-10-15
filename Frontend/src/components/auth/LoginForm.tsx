@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -15,7 +15,6 @@ import { signIn } from "@/services/authService";
 const loginSchema = z.object({
   email: z.string().trim().email("Enter a valid email address."),
   password: z.string().min(6, "Password must be at least 6 characters."),
-  role: z.enum(["employee", "administrator"]),
   remember: z.boolean().optional(),
 });
 
@@ -34,7 +33,7 @@ export function LoginForm() {
     formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { remember: true, role: "employee" },
+    defaultValues: { remember: true },
   });
 
   const onSubmit = async (values: LoginFormValues) => {
@@ -42,11 +41,7 @@ export function LoginForm() {
     setError(null);
 
     try {
-      const user = await signIn(
-        values.email.trim(),
-        values.password,
-        values.role,
-      );
+      const user = await signIn(values.email.trim(), values.password);
 
       if (user.role === "administrator") {
         router.push("/admin");
@@ -105,14 +100,6 @@ export function LoginForm() {
             </p>
           )}
         </div>
-        <div>
-          <label htmlFor="role" className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700"><ShieldCheck className="h-4 w-4 text-slate-400" /> Sign in as</label>
-          <select id="role" className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm" {...register("role")}>
-            <option value="employee">Employee</option>
-            <option value="administrator">Administrator</option>
-          </select>
-        </div>
-
         {/* Password field */}
         <div>
           <label
